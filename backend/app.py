@@ -1,5 +1,11 @@
 from flask import Flask, render_template, request
 import analysis
+import sys
+import os
+
+# Explicitly add the current directory to the Python path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 
 app = Flask(__name__)
 
