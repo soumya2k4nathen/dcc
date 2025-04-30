@@ -1,70 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Analysis Results</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            padding: 20px;
-        }
-        h1 {
-            color: #333;
-        }
-        h3 {
-            color: #555;
-        }
-        .result-container {
-            margin-bottom: 30px;
-        }
-        .result-container h4 {
-            color: #444;
-        }
-        .plot-container {
-            margin-top: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .plot-container img {
-            max-width: 500px;
-            max-height: 400px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-    </style>
+  <title>Road Accident Analysis</title>
 </head>
 <body>
+  <h1>Choose Analysis Type</h1>
+  <form method="post">
+    <select name="analysis">
+      <option value="univariate">Univariate</option>
+      <option value="bivariate">Bivariate</option>
+      <option value="multivariate">Multivariate</option>
+    </select>
+    <button type="submit">Submit</button>
+  </form>
 
-    <h1>Data Analysis Results</h1>
-
-    <!-- Univariate Analysis Section -->
-    <div class="result-container">
-        <h3>Univariate Analysis</h3>
-        <div>{{ results[0] | safe }}</div>
-    </div>
-
-    <!-- Bivariate Analysis Section -->
-    <div class="result-container">
-        <h3>Bivariate Analysis</h3>
-        <div>{{ results[1] | safe }}</div>
-    </div>
-
-    <!-- Multivariate Analysis Section -->
-    <div class="result-container">
-        <h3>Multivariate Analysis</h3>
-        <div>{{ results[2] | safe }}</div>
-    </div>
-
-    <!-- Plots Section -->
-    <div class="plot-container">
-        {% for plot in plots %}
-            <img src="{{ url_for('serve_file', filename=plot) }}" alt="Analysis Plot">
-        {% endfor %}
-    </div>
-
+  {% if result %}
+    {% if result.type == 'univariate' %}
+      <h2>Mean and Standard Deviation</h2>{{ result.mean_std|safe }}
+      <h2>Mode</h2>{{ result.mode|safe }}
+    {% elif result.type == 'bivariate' %}
+      <h2>Bivariate Plots</h2>
+      {% for img in result.plots %}
+        <img src="data:image/png;base64,{{ img }}"><br>
+      {% endfor %}
+      <p>{{ result.chi }}</p>
+    {% elif result.type == 'multivariate' %}
+      <h2>Multivariate Plots</h2>
+      {% for img in result.plots %}
+        <img src="data:image/png;base64,{{ img }}"><br>
+      {% endfor %}
+      <h3>SVM Report</h3><pre>{{ result.svm }}</pre>
+      <h3>Naive Bayes Report</h3><pre>{{ result.nb }}</pre>
+      <h3>Multilinear R²</h3><p>{{ result.mlr }}</p>
+    {% endif %}
+  {% endif %}
 </body>
 </html>

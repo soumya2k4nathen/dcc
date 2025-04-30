@@ -1,29 +1,23 @@
-from flask import Flask, render_template, send_from_directory
-import os
-from analysis import perform_univariate, perform_bivariate, perform_multivariate
+from flask import Flask, render_template, request
+import analysis
 
 app = Flask(__name__)
 
-# Path to the static folder to store the images
-app.config['UPLOAD_FOLDER'] = 'static/'
-
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    # Perform all analyses
-    univariate_result, univariate_plots = perform_univariate()
-    bivariate_result, bivariate_plots = perform_bivariate('feature1', 'feature2')
-    multivariate_result, multivariate_plots = perform_multivariate()
-
-    # Combine results and plot paths
-    all_results = univariate_result + bivariate_result + multivariate_result
-    all_plots = univariate_plots + bivariate_plots + multivariate_plots
-
-    # Return results to the template
-    return render_template('index.html', results=all_results, plots=all_plots)
-
-@app.route('/static/<filename>')
-def serve_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    result = {}
+    if request.method == 'POST':
+        analysis_type = request.form['analysis']
+        if analysis_type == 'univariate':
+            mean_std, mode = analysis.univariate_analysis()
+            result = {'type': 'univariate', 'mean_std': mean_std, 'mode': mode}
+        elif analysis_type == 'bivariate':
+            plots, chi = analysis.bivariate_analysis()
+            result = {'type': 'bivariate', 'plots': plots, 'chi': chi}
+        elif analysis_type == 'multivariate':
+            plots, svm_r, nb_r, mlr = analysis.multivariate_analysis()
+            result = {'type': 'multivariate', 'plots': plots, 'svm': svm_r, 'nb': nb_r, 'mlr': mlr}
+    return render_template('index.html', result=result)
 
 if __name__ == '__main__':
     app.run(debug=True)
